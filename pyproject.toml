@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "openai-agents-scavio"
+version = "0.1.0"
+description = "Scavio real-time search tools (Google, YouTube, Amazon, Walmart, Reddit, TikTok, Instagram) for the OpenAI Agents SDK"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Scavio", email = "support@scavio.dev" }]
+keywords = ["openai", "openai-agents", "agents", "scavio", "search", "tools", "serp", "tavily-alternative"]
+dependencies = [
+    "openai-agents>=0.17",
+    "scavio>=0.2.1",
+]
+
+[project.urls]
+Homepage = "https://scavio.dev"
+Repository = "https://github.com/scavio-ai/openai-agents-scavio"
+Documentation = "https://scavio.dev/docs/openai-agents"
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["openai_agents_scavio"]
