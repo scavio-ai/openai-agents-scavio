@@ -59,20 +59,20 @@ def get_scavio_tools(
 
     if all or enable_google:
         @function_tool
-        def scavio_google_search(query: str, country_code: Optional[str] = None, language: Optional[str] = None, page: Optional[int] = None, search_type: Optional[str] = None, device: Optional[str] = None, nfpr: Optional[bool] = None, light_request: Optional[bool] = None) -> dict:
-            """Search Google for real-time web results (organic, knowledge graph, news, and more).
+        def scavio_google_search(query: str, country_code: Optional[str] = None, language: Optional[str] = None, page: Optional[int] = None, device: Optional[str] = None, nfpr: Optional[bool] = None) -> dict:
+            """Search Google for real-time web results (organic results, ads, and the AI Overview when present). Costs 1 credit.
 
             Args:
                 query: The search query.
-                country_code: Two-letter country code, e.g. us.
-                language: Two-letter language code, e.g. en.
+                country_code: Two-letter country of the search, e.g. us.
+                language: Two-letter UI language code, e.g. en.
                 page: Result page number (1-based).
-                search_type: Search vertical: classic, news, maps, images, or lens.
                 device: Device profile: desktop or mobile.
                 nfpr: Disable query auto-correction when true.
-                light_request: Cheaper, lighter response (1 credit instead of 2) when true.
             """
-            _p = {"query": query, "country_code": country_code, "language": language, "page": page, "search_type": search_type, "device": device, "nfpr": nfpr, "light_request": light_request}
+            _p = {"query": query, "gl": country_code, "hl": language, "device": device, "nfpr": nfpr}
+            if page is not None and page > 1:
+                _p["start"] = (page - 1) * 10
             return _run(lambda: client.google.search(**{k: v for k, v in _p.items() if v is not None}))
         tools.append(scavio_google_search)
 
