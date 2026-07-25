@@ -155,33 +155,189 @@ def get_scavio_tools(
 
     if all or enable_youtube:
         @function_tool
-        def scavio_youtube_search(query: str, upload_date: Optional[str] = None, type: Optional[str] = None, duration: Optional[str] = None, sort_by: Optional[str] = None, hd: Optional[bool] = None, subtitles: Optional[bool] = None, creative_commons: Optional[bool] = None, live: Optional[bool] = None) -> dict:
-            """Search YouTube for videos, channels, or playlists.
+        def scavio_youtube_search(query: str, upload_date: Optional[str] = None, type: Optional[str] = None, duration: Optional[str] = None, sort_by: Optional[str] = None, features: Optional[list] = None, cursor: Optional[str] = None, hd: Optional[bool] = None, subtitles: Optional[bool] = None, creative_commons: Optional[bool] = None, live: Optional[bool] = None) -> dict:
+            """Search YouTube for videos, channels, or playlists. Costs 2 credits.
 
             Args:
                 query: The video search query.
-                upload_date: Upload date filter: today, week, month.
-                type: Result type: video, channel, playlist.
-                duration: Duration filter: short or long.
-                sort_by: Sort order for results.
+                upload_date: Upload date filter: last_hour, today, this_week, this_month, this_year.
+                type: Result type: video, channel, playlist, movie.
+                duration: Duration filter: short, medium, long.
+                sort_by: Sort order: relevance, date, view_count, rating.
+                features: Feature filters, e.g. ['hd', '4k', 'subtitles', 'creative_commons', 'live', '360', '3d', 'hdr', 'vr180'].
+                cursor: Pagination cursor from a prior response.
                 hd: Restrict to HD videos when true.
                 subtitles: Restrict to videos with subtitles when true.
                 creative_commons: Restrict to Creative Commons videos when true.
                 live: Restrict to live videos when true.
             """
-            _p = {"query": query, "upload_date": upload_date, "type": type, "duration": duration, "sort_by": sort_by, "hd": hd, "subtitles": subtitles, "creative_commons": creative_commons, "live": live}
+            _p = {"query": query, "upload_date": upload_date, "type": type, "duration": duration, "sort_by": sort_by, "features": features, "cursor": cursor, "hd": hd, "subtitles": subtitles, "creative_commons": creative_commons, "live": live}
             return _run(lambda: client.youtube.search(**{k: v for k, v in _p.items() if v is not None}))
         tools.append(scavio_youtube_search)
         @function_tool
-        def scavio_youtube_metadata(video_id: str) -> dict:
-            """Fetch metadata for a YouTube video by id.
+        def scavio_youtube_shorts(query: str, sort_by: Optional[str] = None, cursor: Optional[str] = None) -> dict:
+            """Search YouTube Shorts by keyword. Costs 2 credits.
 
             Args:
-                video_id: YouTube video id.
+                query: The Shorts search query.
+                sort_by: Sort order for results.
+                cursor: Pagination cursor.
+            """
+            _p = {"query": query, "sort_by": sort_by, "cursor": cursor}
+            return _run(lambda: client.youtube.shorts(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_shorts)
+        @function_tool
+        def scavio_youtube_suggestions(query: str, language: Optional[str] = None, region: Optional[str] = None) -> dict:
+            """Fetch YouTube search autocomplete suggestions for a query.
+
+            Args:
+                query: The partial search query to autocomplete.
+                language: Two-letter language code (default en).
+                region: Two-letter region code (default US).
+            """
+            _p = {"query": query, "language": language, "region": region}
+            return _run(lambda: client.youtube.suggestions(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_suggestions)
+        @function_tool
+        def scavio_youtube_video(video_id: str) -> dict:
+            """Fetch full details for a YouTube video (title, author, view count, description, captions, chapters).
+
+            Args:
+                video_id: YouTube video id or a full watch URL.
             """
             _p = {"video_id": video_id}
-            return _run(lambda: client.youtube.metadata(**{k: v for k, v in _p.items() if v is not None}))
+            return _run(lambda: client.youtube.video(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_video)
+        @function_tool
+        def scavio_youtube_metadata(video_id: str) -> dict:
+            """Deprecated alias of scavio_youtube_video. Fetch details for a YouTube video by id.
+
+            Args:
+                video_id: YouTube video id or a full watch URL.
+            """
+            _p = {"video_id": video_id}
+            return _run(lambda: client.youtube.video(**{k: v for k, v in _p.items() if v is not None}))
         tools.append(scavio_youtube_metadata)
+        @function_tool
+        def scavio_youtube_comments(video_id: str, cursor: Optional[str] = None) -> dict:
+            """List comments on a YouTube video.
+
+            Args:
+                video_id: YouTube video id or a full watch URL.
+                cursor: Pagination cursor.
+            """
+            _p = {"video_id": video_id, "cursor": cursor}
+            return _run(lambda: client.youtube.comments(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_comments)
+        @function_tool
+        def scavio_youtube_comment_replies(video_id: str, reply_cursor: str, cursor: Optional[str] = None) -> dict:
+            """List replies to a YouTube comment.
+
+            Args:
+                video_id: YouTube video id or a full watch URL.
+                reply_cursor: Reply cursor from a parent comment's reply_cursor.
+                cursor: Pagination cursor.
+            """
+            _p = {"video_id": video_id, "reply_cursor": reply_cursor, "cursor": cursor}
+            return _run(lambda: client.youtube.comment_replies(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_comment_replies)
+        @function_tool
+        def scavio_youtube_transcript(video_id: str, language: Optional[str] = None, format: Optional[str] = None) -> dict:
+            """Fetch a YouTube video's transcript or timed subtitles. Costs 8 credits.
+
+            Args:
+                video_id: YouTube video id or a full watch URL.
+                language: Transcript language code (default en).
+                format: 'text' for a plain transcript, 'srt' for timed subtitles.
+            """
+            _p = {"video_id": video_id, "language": language, "format": format}
+            return _run(lambda: client.youtube.transcript(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_transcript)
+        @function_tool
+        def scavio_youtube_related(video_id: str, cursor: Optional[str] = None) -> dict:
+            """List videos related to a YouTube video.
+
+            Args:
+                video_id: YouTube video id or a full watch URL.
+                cursor: Pagination cursor.
+            """
+            _p = {"video_id": video_id, "cursor": cursor}
+            return _run(lambda: client.youtube.related(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_related)
+        @function_tool
+        def scavio_youtube_channel_search(query: str, cursor: Optional[str] = None) -> dict:
+            """Search YouTube channels by keyword.
+
+            Args:
+                query: The channel search query.
+                cursor: Pagination cursor.
+            """
+            _p = {"query": query, "cursor": cursor}
+            return _run(lambda: client.youtube.channel_search(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_channel_search)
+        @function_tool
+        def scavio_youtube_channel(channel_id: str) -> dict:
+            """Fetch a YouTube channel's details (subscribers, video count, views, links).
+
+            Args:
+                channel_id: YouTube channel id, @handle, or channel URL.
+            """
+            _p = {"channel_id": channel_id}
+            return _run(lambda: client.youtube.channel(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_channel)
+        @function_tool
+        def scavio_youtube_channel_videos(channel_id: str, cursor: Optional[str] = None) -> dict:
+            """List a YouTube channel's uploaded videos.
+
+            Args:
+                channel_id: YouTube channel id.
+                cursor: Pagination cursor.
+            """
+            _p = {"channel_id": channel_id, "cursor": cursor}
+            return _run(lambda: client.youtube.channel_videos(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_channel_videos)
+        @function_tool
+        def scavio_youtube_channel_shorts(channel_id: str, cursor: Optional[str] = None) -> dict:
+            """List a YouTube channel's Shorts.
+
+            Args:
+                channel_id: YouTube channel id.
+                cursor: Pagination cursor.
+            """
+            _p = {"channel_id": channel_id, "cursor": cursor}
+            return _run(lambda: client.youtube.channel_shorts(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_channel_shorts)
+        @function_tool
+        def scavio_youtube_channel_community(channel_id: str, cursor: Optional[str] = None) -> dict:
+            """List a YouTube channel's community posts.
+
+            Args:
+                channel_id: YouTube channel id.
+                cursor: Pagination cursor.
+            """
+            _p = {"channel_id": channel_id, "cursor": cursor}
+            return _run(lambda: client.youtube.channel_community(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_channel_community)
+        @function_tool
+        def scavio_youtube_channel_resolve(channel: str) -> dict:
+            """Resolve a YouTube @handle or channel URL to a channel id.
+
+            Args:
+                channel: A channel @handle or channel URL.
+            """
+            _p = {"channel": channel}
+            return _run(lambda: client.youtube.channel_resolve(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_channel_resolve)
+        @function_tool
+        def scavio_youtube_streams(video_id: str) -> dict:
+            """Fetch direct playable/downloadable stream URLs for a YouTube video. Costs 3 credits.
+
+            Args:
+                video_id: YouTube video id or a full watch URL.
+            """
+            _p = {"video_id": video_id}
+            return _run(lambda: client.youtube.streams(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_youtube_streams)
 
     if all or enable_reddit:
         @function_tool
