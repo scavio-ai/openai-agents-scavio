@@ -65,7 +65,7 @@ agent = Agent(name="Search Assistant", mcp_servers=[server])
 
 ## Credits
 
-Most calls cost 1 credit (Google included). Reddit and Instagram cost 2 credits. See [scavio.dev/docs](https://scavio.dev/docs).
+Most calls cost 1 credit (Google included). Instagram costs 8-10 credits per call, except user posts which costs 2. See [scavio.dev/docs](https://scavio.dev/docs).
 
 ## Links
 
