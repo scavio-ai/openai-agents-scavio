@@ -41,7 +41,7 @@ def _invoke(tool, args: dict):
 def test_all_tools_register(monkeypatch):
     tools = _build(monkeypatch, all=True)
     names = [t.name for t in tools]
-    assert len(names) == 32, names
+    assert len(names) == 47, names
     assert len(set(names)) == len(names)
     assert all(n.startswith("scavio_") for n in names)
 
