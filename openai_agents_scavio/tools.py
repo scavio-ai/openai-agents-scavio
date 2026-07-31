@@ -77,45 +77,47 @@ def get_scavio_tools(
         tools.append(scavio_google_search)
 
     if all or enable_amazon:
+        # Amazon moved upstream in 2026-07: sort_by, pages, category_id,
+        # merchant_id, language, currency, device, zip_code and
+        # autoselect_variant no longer exist. Removed rather than kept as
+        # no-ops - sort_by was verified to return the identical unordered set
+        # for every value, and a dead param in a tool signature is a filter the
+        # model plans against and never gets. domain still works on the wire as
+        # a deprecated alias but is not offered: one spelling per param.
         @function_tool
-        def scavio_amazon_search(query: str, domain: Optional[str] = None, country: Optional[str] = None, language: Optional[str] = None, currency: Optional[str] = None, device: Optional[str] = None, sort_by: Optional[str] = None, start_page: Optional[int] = None, pages: Optional[int] = None, category_id: Optional[str] = None, merchant_id: Optional[str] = None, zip_code: Optional[str] = None, autoselect_variant: Optional[bool] = None) -> dict:
-            """Search Amazon for products matching a query.
+        def scavio_amazon_search(query: str, country: Optional[str] = None, page: Optional[int] = None) -> dict:
+            """Search Amazon for products matching a query. Results are unsorted and cannot be filtered.
 
             Args:
                 query: The product search query.
-                domain: Amazon domain, e.g. amazon.com.
-                country: Two-letter country code.
-                language: Two-letter language code.
-                currency: Currency code, e.g. USD.
-                device: Device profile: desktop or mobile.
-                sort_by: Sort order for results.
-                start_page: First page to return.
-                pages: Number of pages to return.
-                category_id: Restrict to an Amazon category id.
-                merchant_id: Restrict to a merchant id.
-                zip_code: Delivery ZIP/postal code.
-                autoselect_variant: Auto-select the best product variant when true.
+                country: Marketplace country code (ISO 3166-1 alpha-2), not a domain: us (default), gb (the UK is gb, not uk), ca, de, fr, es, it, jp, in, au, br, mx, nl, pl, se, sg, ae, sa, eg, cn, be, tr. An unknown code falls back to us.
+                page: Result page, 1-based. One page per call, 1 credit each.
             """
-            _p = {"query": query, "domain": domain, "country": country, "language": language, "currency": currency, "device": device, "sort_by": sort_by, "start_page": start_page, "pages": pages, "category_id": category_id, "merchant_id": merchant_id, "zip_code": zip_code, "autoselect_variant": autoselect_variant}
+            _p = {"query": query, "country": country, "page": page}
             return _run(lambda: client.amazon.search(**{k: v for k, v in _p.items() if v is not None}))
         tools.append(scavio_amazon_search)
         @function_tool
-        def scavio_amazon_product(asin: str, domain: Optional[str] = None, country: Optional[str] = None, language: Optional[str] = None, currency: Optional[str] = None, device: Optional[str] = None, zip_code: Optional[str] = None, autoselect_variant: Optional[bool] = None) -> dict:
-            """Fetch full Amazon product details by ASIN.
+        def scavio_amazon_product(asin: str, country: Optional[str] = None) -> dict:
+            """Fetch full Amazon product details by ASIN. price is the buy-box price only.
 
             Args:
                 asin: Amazon Standard Identification Number (ASIN).
-                domain: Amazon domain, e.g. amazon.com.
-                country: Two-letter country code.
-                language: Two-letter language code.
-                currency: Currency code, e.g. USD.
-                device: Device profile: desktop or mobile.
-                zip_code: Delivery ZIP/postal code.
-                autoselect_variant: Auto-select the best product variant when true.
+                country: Marketplace country code (ISO 3166-1 alpha-2), not a domain: us (default), gb (the UK is gb, not uk), ca, de, fr, es, it, jp, in, au, br, mx, nl, pl, se, sg, ae, sa, eg, cn, be, tr. An unknown code falls back to us.
             """
-            _p = {"asin": asin, "domain": domain, "country": country, "language": language, "currency": currency, "device": device, "zip_code": zip_code, "autoselect_variant": autoselect_variant}
+            _p = {"asin": asin, "country": country}
             return _run(lambda: client.amazon.product(**{k: v for k, v in _p.items() if v is not None}))
         tools.append(scavio_amazon_product)
+        @function_tool
+        def scavio_amazon_offers(asin: str, country: Optional[str] = None) -> dict:
+            """List every seller offer for an Amazon ASIN: price, seller, condition, shipping, buy box. Page 1 only.
+
+            Args:
+                asin: Amazon Standard Identification Number (ASIN).
+                country: Marketplace country code (ISO 3166-1 alpha-2), not a domain: us (default), gb (the UK is gb, not uk), ca, de, fr, es, it, jp, in, au, br, mx, nl, pl, se, sg, ae, sa, eg, cn, be, tr. An unknown code falls back to us.
+            """
+            _p = {"asin": asin, "country": country}
+            return _run(lambda: client.amazon.offers(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_amazon_offers)
 
     if all or enable_walmart:
         @function_tool

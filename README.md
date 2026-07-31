@@ -2,6 +2,14 @@
 
 [Scavio](https://scavio.dev) real-time search tools for the [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) — Google, YouTube, Amazon, Walmart, Reddit, TikTok, and Instagram, with one API key.
 
+> **Amazon changed (breaking).** The upstream provider moved in 2026-07:
+> `domain` is replaced by `country`, a two-letter marketplace code (`us`, `gb`
+> -- the UK is `gb`, not `uk` -- `de`, `jp`, ...), and `sort_by`, `pages`,
+> `category_id`, `merchant_id`, `language`, `currency`, `device`, `zip_code`
+> and `autoselect_variant` are gone. The marketplace ignores all of them
+> (`sort_by` returns the identical unordered set for every value), so they are
+> removed rather than kept as silent no-ops. Rank and filter results yourself.
+
 ## Install
 
 ```bash
@@ -46,7 +54,7 @@ Pass `all=True` to register every tool regardless of the individual flags.
 
 ## Tools
 
-`get_scavio_tools()` returns 32 function tools, one per Scavio endpoint, named `scavio_<provider>_<action>` (e.g. `scavio_google_search`, `scavio_amazon_product`, `scavio_reddit_post`). Each returns the structured Scavio JSON response; errors come back as `{"error": "..."}` rather than raising, so a failed call never crashes the run.
+`get_scavio_tools()` returns one function tool per Scavio endpoint, named `scavio_<provider>_<action>` (e.g. `scavio_google_search`, `scavio_amazon_product`, `scavio_reddit_post`). Each returns the structured Scavio JSON response; errors come back as `{"error": "..."}` rather than raising, so a failed call never crashes the run.
 
 ## Use every endpoint via MCP
 
