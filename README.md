@@ -9,6 +9,9 @@
 > and `autoselect_variant` are gone. The marketplace ignores all of them
 > (`sort_by` returns the identical unordered set for every value), so they are
 > removed rather than kept as silent no-ops. Rank and filter results yourself.
+> A third Amazon tool arrived with the move: `scavio_amazon_offers` lists every
+> seller offering an ASIN -- price, condition, shipping, and which offer holds
+> the buy box. 1 credit, same as the other two.
 
 ## Install
 
