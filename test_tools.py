@@ -41,9 +41,12 @@ def _invoke(tool, args: dict):
 def test_all_tools_register(monkeypatch):
     tools = _build(monkeypatch, all=True)
     names = [t.name for t in tools]
-    assert len(names) == 47, names
+    assert len(names) == 46, names
     assert len(set(names)) == len(names)
     assert all(n.startswith("scavio_") for n in names)
+    # /youtube/metadata is a deprecated alias of /youtube/video; only /video ships.
+    assert "scavio_youtube_video" in names
+    assert "scavio_youtube_metadata" not in names
 
 
 def test_provider_gating(monkeypatch):
@@ -95,6 +98,17 @@ def test_google_drops_v1_only_params(monkeypatch):
     props = g.params_json_schema.get("properties", {})
     assert "search_type" not in props and "light_request" not in props
     assert {"query", "country_code", "language", "page", "device", "nfpr"} <= set(props)
+
+
+def test_reddit_search_has_no_phantom_filters(monkeypatch):
+    tools = _build(monkeypatch, enable_reddit=True, enable_google=False, enable_amazon=False,
+                   enable_walmart=False, enable_youtube=False, enable_tiktok=False, enable_instagram=False)
+    s = next(t for t in tools if t.name == "scavio_reddit_search")
+    props = s.params_json_schema.get("properties", {})
+    # The API reads query and cursor only; type/sort were stripped on the wire.
+    assert set(props) == {"query", "cursor"}
+    out = _invoke(s, {"query": "serpapi alternative", "cursor": "abc"})
+    assert out["kwargs"] == {"query": "serpapi alternative", "cursor": "abc"}
 
 
 def test_amazon_product_uses_asin(monkeypatch):

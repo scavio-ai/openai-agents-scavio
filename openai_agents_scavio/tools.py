@@ -210,16 +210,9 @@ def get_scavio_tools(
             _p = {"video_id": video_id}
             return _run(lambda: client.youtube.video(**{k: v for k, v in _p.items() if v is not None}))
         tools.append(scavio_youtube_video)
-        @function_tool
-        def scavio_youtube_metadata(video_id: str) -> dict:
-            """Deprecated alias of scavio_youtube_video. Fetch details for a YouTube video by id.
-
-            Args:
-                video_id: YouTube video id or a full watch URL.
-            """
-            _p = {"video_id": video_id}
-            return _run(lambda: client.youtube.video(**{k: v for k, v in _p.items() if v is not None}))
-        tools.append(scavio_youtube_metadata)
+        # /youtube/metadata is a deprecated alias of /youtube/video with the same
+        # schema and the same handler. It is not registered as its own tool: two
+        # identical tools only split the model's choice.
         @function_tool
         def scavio_youtube_comments(video_id: str, cursor: Optional[str] = None) -> dict:
             """List comments on a YouTube video.
@@ -342,22 +335,23 @@ def get_scavio_tools(
         tools.append(scavio_youtube_streams)
 
     if all or enable_reddit:
+        # /reddit/search takes query and cursor only. The type and sort params it
+        # used to advertise were never read by the API - they were stripped on the
+        # wire, so the model planned around a filter it never got. Removed.
         @function_tool
-        def scavio_reddit_search(query: str, type: Optional[str] = None, sort: Optional[str] = None, cursor: Optional[str] = None) -> dict:
-            """Search Reddit posts, subreddits, or users.
+        def scavio_reddit_search(query: str, cursor: Optional[str] = None) -> dict:
+            """Search Reddit posts by keyword. Costs 1 credit. Posts only: there is no type or sort filter, so rank data.results yourself.
 
             Args:
                 query: The Reddit search query.
-                type: Search type: posts, subreddits, users.
-                sort: Sort order: relevance, new, top.
-                cursor: Pagination cursor.
+                cursor: Pagination cursor. Pass data.next_cursor from a prior response; data.has_more says whether another page exists.
             """
-            _p = {"query": query, "type": type, "sort": sort, "cursor": cursor}
+            _p = {"query": query, "cursor": cursor}
             return _run(lambda: client.reddit.search(**{k: v for k, v in _p.items() if v is not None}))
         tools.append(scavio_reddit_search)
         @function_tool
         def scavio_reddit_post(url: str) -> dict:
-            """Fetch a Reddit post and its comment thread by URL.
+            """Fetch one Reddit post by URL. Costs 1 credit. data is a flat post object (title, text, score, upvote_ratio, num_comments, subreddit, author) and carries no comments.
 
             Args:
                 url: Full URL of the Reddit post.
@@ -505,7 +499,7 @@ def get_scavio_tools(
     if all or enable_instagram:
         @function_tool
         def scavio_instagram_profile(username: Optional[str] = None, user_id: Optional[str] = None) -> dict:
-            """Fetch an Instagram profile by username or user id.
+            """Fetch an Instagram profile by username or user id. Costs 10 credits.
 
             Args:
                 username: Instagram username. Provide this or user_id.
@@ -516,7 +510,7 @@ def get_scavio_tools(
         tools.append(scavio_instagram_profile)
         @function_tool
         def scavio_instagram_user_posts(username: Optional[str] = None, user_id: Optional[str] = None, count: Optional[int] = None, cursor: Optional[str] = None) -> dict:
-            """List an Instagram user's posts.
+            """List an Instagram user's posts. Costs 2 credits.
 
             Args:
                 username: Instagram username. Provide this or user_id.
@@ -529,7 +523,7 @@ def get_scavio_tools(
         tools.append(scavio_instagram_user_posts)
         @function_tool
         def scavio_instagram_user_reels(username: Optional[str] = None, user_id: Optional[str] = None, count: Optional[int] = None, cursor: Optional[str] = None) -> dict:
-            """List an Instagram user's reels.
+            """List an Instagram user's reels. Costs 10 credits.
 
             Args:
                 username: Instagram username. Provide this or user_id.
@@ -542,7 +536,7 @@ def get_scavio_tools(
         tools.append(scavio_instagram_user_reels)
         @function_tool
         def scavio_instagram_user_tagged(username: Optional[str] = None, user_id: Optional[str] = None, count: Optional[int] = None, cursor: Optional[str] = None) -> dict:
-            """List posts an Instagram user is tagged in.
+            """List posts an Instagram user is tagged in. Costs 10 credits.
 
             Args:
                 username: Instagram username. Provide this or user_id.
@@ -555,7 +549,7 @@ def get_scavio_tools(
         tools.append(scavio_instagram_user_tagged)
         @function_tool
         def scavio_instagram_user_stories(username: Optional[str] = None, user_id: Optional[str] = None) -> dict:
-            """Fetch an Instagram user's current stories.
+            """Fetch an Instagram user's current stories. Costs 10 credits.
 
             Args:
                 username: Instagram username. Provide this or user_id.
@@ -566,7 +560,7 @@ def get_scavio_tools(
         tools.append(scavio_instagram_user_stories)
         @function_tool
         def scavio_instagram_post(url: Optional[str] = None, media_id: Optional[str] = None, shortcode: Optional[str] = None) -> dict:
-            """Fetch an Instagram post by URL, media id, or shortcode.
+            """Fetch an Instagram post by URL, media id, or shortcode. Costs 8 credits.
 
             Args:
                 url: Post URL. Provide one of url, media_id, or shortcode.
@@ -578,7 +572,7 @@ def get_scavio_tools(
         tools.append(scavio_instagram_post)
         @function_tool
         def scavio_instagram_post_comments(shortcode: Optional[str] = None, url: Optional[str] = None, cursor: Optional[str] = None, sort_order: Optional[str] = None) -> dict:
-            """List comments on an Instagram post by shortcode or URL.
+            """List comments on an Instagram post by shortcode or URL. Costs 10 credits.
 
             Args:
                 shortcode: Post shortcode. Provide this or url.
@@ -591,7 +585,7 @@ def get_scavio_tools(
         tools.append(scavio_instagram_post_comments)
         @function_tool
         def scavio_instagram_comment_replies(media_id: str, comment_id: str, cursor: Optional[str] = None) -> dict:
-            """List replies to an Instagram post comment.
+            """List replies to an Instagram post comment. Costs 8 credits.
 
             Args:
                 media_id: Post media id.
@@ -603,7 +597,7 @@ def get_scavio_tools(
         tools.append(scavio_instagram_comment_replies)
         @function_tool
         def scavio_instagram_search_users(keyword: str, cursor: Optional[str] = None) -> dict:
-            """Search Instagram users by keyword.
+            """Search Instagram users by keyword. Costs 10 credits.
 
             Args:
                 keyword: Search keyword.
@@ -614,7 +608,7 @@ def get_scavio_tools(
         tools.append(scavio_instagram_search_users)
         @function_tool
         def scavio_instagram_search_hashtags(keyword: str, cursor: Optional[str] = None) -> dict:
-            """Search Instagram hashtags by keyword.
+            """Search Instagram hashtags by keyword. Costs 10 credits.
 
             Args:
                 keyword: Search keyword.
@@ -625,7 +619,7 @@ def get_scavio_tools(
         tools.append(scavio_instagram_search_hashtags)
         @function_tool
         def scavio_instagram_user_followers(username: Optional[str] = None, user_id: Optional[str] = None, count: Optional[int] = None, cursor: Optional[str] = None) -> dict:
-            """List an Instagram user's followers.
+            """List an Instagram user's followers. Costs 10 credits.
 
             Args:
                 username: Instagram username. Provide this or user_id.
@@ -638,7 +632,7 @@ def get_scavio_tools(
         tools.append(scavio_instagram_user_followers)
         @function_tool
         def scavio_instagram_user_followings(username: Optional[str] = None, user_id: Optional[str] = None, count: Optional[int] = None, cursor: Optional[str] = None) -> dict:
-            """List the accounts an Instagram user follows.
+            """List the accounts an Instagram user follows. Costs 10 credits.
 
             Args:
                 username: Instagram username. Provide this or user_id.

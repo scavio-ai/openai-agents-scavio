@@ -13,7 +13,7 @@ authors = [{ name = "Scavio", email = "support@scavio.dev" }]
 keywords = ["openai", "openai-agents", "agents", "scavio", "search", "tools", "serp", "tavily-alternative"]
 dependencies = [
     "openai-agents>=0.17",
-    "scavio>=0.12.0",
+    "scavio>=0.13.0",
 ]
 
 [project.urls]
