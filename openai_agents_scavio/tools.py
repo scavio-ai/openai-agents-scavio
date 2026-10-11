@@ -655,7 +655,7 @@ def get_scavio_tools(
         tools.append(scavio_youtube_comment_replies)
         @function_tool
         def scavio_youtube_transcript(video_id: str, language: Optional[str] = None, format: Optional[Literal["text", "srt"]] = None) -> dict:
-            """Fetch a YouTube video's transcript or timed subtitles. Costs 8 credits, the most expensive YouTube tool.
+            """Fetch a YouTube video's transcript or timed subtitles. Costs 5 credits, the most expensive YouTube tool.
 
             Args:
                 video_id: YouTube video id or a full watch URL.
