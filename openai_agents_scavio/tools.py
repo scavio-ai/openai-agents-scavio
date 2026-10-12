@@ -20,7 +20,7 @@ website tools that map a site's URLs, crawl a site and batch-extract a URL list
 before website crawling, plus 5 website tools (193 in all). The seven that are not
 registered are dead or duplicate surfaces: /youtube/metadata (a deprecated alias
 of /youtube/video), /amazon/options (a keyless static marketplace list, not a
-search), and the five LinkedIn endpoints the upstream provider withdrew, which
+search), and the five retired LinkedIn endpoints, which
 always return HTTP 410.
 
 Each platform is gated by an ``enable_*`` flag. Tools return the Scavio JSON response.
@@ -1736,7 +1736,7 @@ def get_scavio_tools(
                 query: Keyword to search (1-500 characters). Optional: a seller-only search pages that seller's whole catalogue.
                 seller: Restrict results to one seller's listings (1-64 characters), as in ebay.com/usr/<name>. Can be sent with no query.
                 page: Results page, 1-based.
-                sort_by: Result sort order. Defaults to 'best_match'. eBay's 'Distance: nearest first' is deliberately unsupported (it ranks against our proxy exit, not the caller). One of: best_match, ending_soonest, newly_listed, price_low, price_high.
+                sort_by: Result sort order. Defaults to 'best_match'. eBay's 'Distance: nearest first' is deliberately unsupported (it would not rank by the location of the caller). One of: best_match, ending_soonest, newly_listed, price_low, price_high.
                 min_price: Minimum price, inclusive. Must be 0 or greater.
                 max_price: Maximum price, inclusive. Must be 0 or greater.
                 condition: Item condition filter. 'refurbished' is eBay's parent condition, not one of its three graded tiers. One of: new, open_box, refurbished, used, for_parts.
@@ -1944,7 +1944,7 @@ def get_scavio_tools(
                 adults: Adult guests, >= 1 (default 2).
                 children_ages: AGES of accompanying children, each 0-17, max 10 entries. Ages, not a count.
                 rooms: Rooms required, >= 1 (default 1).
-                currency: ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking prices off the proxy exit and identical requests disagree.
+                currency: ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking picks a currency itself and identical requests can disagree.
             """
             _p = {"destination": destination, "dest_id": dest_id, "dest_type": dest_type, "page": page, "sort_by": sort_by, "min_price": min_price, "max_price": max_price, "stars": stars, "min_review_score": min_review_score, "property_type": property_type, "free_cancellation": free_cancellation, "no_prepayment": no_prepayment, "breakfast_included": breakfast_included, "checkin": checkin, "checkout": checkout, "adults": adults, "children_ages": children_ages, "rooms": rooms, "currency": currency}
             return _run(lambda: client.booking.search(**{k: v for k, v in _p.items() if v is not None}))
@@ -1961,7 +1961,7 @@ def get_scavio_tools(
                 adults: Adult guests, >= 1 (default 2).
                 children_ages: AGES of accompanying children, each 0-17, max 10 entries. Ages, not a count.
                 rooms: Rooms required, >= 1 (default 1).
-                currency: ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking prices off the proxy exit and identical requests disagree.
+                currency: ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking picks a currency itself and identical requests can disagree.
             """
             _p = {"hotel": hotel, "country_code": country_code, "checkin": checkin, "checkout": checkout, "adults": adults, "children_ages": children_ages, "rooms": rooms, "currency": currency}
             return _run(lambda: client.booking.hotel(**{k: v for k, v in _p.items() if v is not None}))
@@ -2111,7 +2111,7 @@ def get_scavio_tools(
                 guest_favorite: Guest Favorite listings only.
                 free_cancellation: Listings with free cancellation only.
                 amenities: Comma-separated amenities (1-200 characters): wifi, air_conditioning, pool, kitchen, free_parking, washer, self_check_in, tv, or raw numeric Airbnb amenity ids. An unrecognised NAME is rejected before the scrape.
-                currency: ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Airbnb prices off the proxy exit and identical requests disagree.
+                currency: ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Airbnb picks a currency itself and identical requests can disagree.
                 page: Results page, 1-based. 18 listings per page. Cannot be combined with cursor.
                 cursor: next_cursor from a previous response (1-500 characters); wins over page, so sending both is rejected.
             """
@@ -2177,7 +2177,7 @@ def get_scavio_tools(
             """Up to THREE full Glassdoor reviews - the cap is Glassdoor's login wall - with per-axis scores, pros, cons, advice, job title, location, employment status and employer response, plus complete rating statistics, star distribution, aggregate pro/con highlight terms and per-job-title review counts. There is no page param: move the window with category and employment_status. Provide employer_id or url. Costs 1 credit.
 
             Args:
-                employer_id: Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a STRING - a JSON number is rejected. Addressing by id costs two upstream fetches; the customer price is unchanged.
+                employer_id: Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a STRING - a JSON number is rejected. Addressing by id takes an extra lookup; the customer price is unchanged.
                 company: Employer name as it appears in a Glassdoor slug (1-200 characters). COSMETIC: ignored when url is set, and it does not satisfy the employer_id-or-url requirement.
                 url: Any glassdoor.com employer URL (1-500 characters). Pass back reviews_url from company() to skip the resolve fetch. A non-glassdoor.com host is rejected.
                 category: Restrict to reviews Glassdoor files under one topic. Closed enum: Glassdoor IGNORES an unknown value and serves the unfiltered set under a 200. Read filtered_review_count on the response to see how many match. One of: career_development, compensation, culture, diversity_and_inclusion, management, work_life_balance.
@@ -2191,7 +2191,7 @@ def get_scavio_tools(
             """Glassdoor salaries by job title, 10 titles per page: base-pay and total-pay percentiles P10-P90 with medians called out, sample counts, currency, pay period and last-reported date. The figures are Glassdoor's ESTIMATES for the title, not individual reported salaries. Provide employer_id or url. Costs 1 credit.
 
             Args:
-                employer_id: Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a STRING - a JSON number is rejected. Addressing by id costs two upstream fetches; the customer price is unchanged.
+                employer_id: Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a STRING - a JSON number is rejected. Addressing by id takes an extra lookup; the customer price is unchanged.
                 company: Employer name as it appears in a Glassdoor slug (1-200 characters). COSMETIC: ignored when url is set, and it does not satisfy the employer_id-or-url requirement.
                 url: Any glassdoor.com employer URL (1-500 characters). Pass back salaries_url from company() to skip the resolve fetch. A non-glassdoor.com host is rejected.
                 page: Results page, 1-based. Ten job titles per page; page_count on the response is how many pages exist.
@@ -2207,7 +2207,7 @@ def get_scavio_tools(
 
             Args:
                 term: What to look for (1-200 characters): a category ('plumbers'), a dish, or a business name. Required together with location unless url is given.
-                location: Where to look (1-200 characters): city and region, a full address, or a postcode. Effectively required - Yelp geolocates a location-less search off the proxy exit, so the same request answers about a different metro run to run.
+                location: Where to look (1-200 characters): city and region, a full address, or a postcode. Effectively required - without it Yelp picks a location itself, so the same request can answer about a different metro run to run.
                 page: Results page, 1-based. Yelp fixes the page size at 10.
                 sort: Result ordering (upstream default 'recommended'). Closed enum: Yelp IGNORES an unrecognised sortby and serves default ranking under a 200, billing a premium scrape for a sort that never ran. One of: recommended, rating, review_count.
                 price: Price bands to include, 1 ($) to 4 ($$$$); 1-4 values, combined freely - [1, 2] means $ or $$.
