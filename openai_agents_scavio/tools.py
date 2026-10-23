@@ -138,7 +138,7 @@ def get_scavio_tools(
         enable_threads: Register the Threads tools (6). Defaults to True.
         enable_kuaishou: Register the Kuaishou tools (14). Defaults to True.
         enable_ebay: Register the eBay tools (3). Defaults to True.
-        enable_target: Register the Target tools (4). Defaults to True.
+        enable_target: Register the Target tools (5). Defaults to True.
         enable_home_depot: Register the Home Depot tools (3). Defaults to True.
         enable_zillow: Register the Zillow tools (3). Defaults to True.
         enable_booking: Register the Booking.com tools (3). Defaults to True.
@@ -1780,7 +1780,7 @@ def get_scavio_tools(
                 page: Results page, 1-based.
                 count: Results per page, 1-28. Defaults to 24; Target rejects anything above 28 outright.
                 sort: Result sort order. Defaults to 'relevance'. One of: relevance, featured, price_low, price_high, rating_high, best_seller, newest.
-                store_id: Numeric Target store id whose prices and availability the response reflects. Defaults to '3991', the store target.com uses with no store context.
+                store_id: Numeric Target store id whose prices the response reflects. Defaults to '3991', the store target.com uses with no store context.
             """
             _p = {"keyword": keyword, "page": page, "count": count, "sort": sort, "store_id": store_id}
             return _run(lambda: client.target.search(**{k: v for k, v in _p.items() if v is not None}))
@@ -1794,7 +1794,7 @@ def get_scavio_tools(
                 page: Results page, 1-based.
                 count: Results per page, 1-28. Defaults to 24; Target rejects anything above 28 outright.
                 sort: Result sort order. Defaults to 'relevance'. One of: relevance, featured, price_low, price_high, rating_high, best_seller, newest.
-                store_id: Numeric Target store id whose prices and availability the response reflects. Defaults to '3991'.
+                store_id: Numeric Target store id whose prices the response reflects. Defaults to '3991'.
             """
             _p = {"category_id": category_id, "page": page, "count": count, "sort": sort, "store_id": store_id}
             return _run(lambda: client.target.category(**{k: v for k, v in _p.items() if v is not None}))
@@ -1805,7 +1805,7 @@ def get_scavio_tools(
 
             Args:
                 tcin: Target catalog id (tcin, e.g. '1010453160'). A colour/size child tcin is answered by its variation parent, with the child present in 'variants'.
-                store_id: Numeric Target store id whose prices and availability the response reflects. Defaults to '3991'.
+                store_id: Numeric Target store id whose prices the response reflects. Defaults to '3991'.
             """
             _p = {"tcin": tcin, "store_id": store_id}
             return _run(lambda: client.target.product(**{k: v for k, v in _p.items() if v is not None}))
@@ -1817,11 +1817,24 @@ def get_scavio_tools(
             Args:
                 tcin: Target catalog id (tcin, e.g. '1010453160').
                 limit: Trim the returned reviews to at most this many (1 or greater). Target publishes 8 anonymously and offers no paging, so this only trims.
-                store_id: Numeric Target store id whose prices and availability the response reflects. Defaults to '3991'.
+                store_id: Numeric Target store id whose prices the response reflects. Defaults to '3991'.
             """
             _p = {"tcin": tcin, "limit": limit, "store_id": store_id}
             return _run(lambda: client.target.reviews(**{k: v for k, v in _p.items() if v is not None}))
         tools.append(scavio_target_reviews)
+        @function_tool
+        def scavio_target_availability(tcin: str, zip: str, radius: Optional[int] = None, store_id: Optional[str] = None) -> dict:
+            """In-store stock for a Target product at every store near a ZIP: units available, in-store, pickup, curbside and ship-to-store status, distance, address and hours. Costs 1 credit.
+
+            Args:
+                tcin: Target catalog id (tcin, e.g. '85978609').
+                zip: 5-digit US ZIP code to search around.
+                radius: Search radius in miles, 1-100. Defaults to 25. At most 20 stores.
+                store_id: Return only this Target store. It must be within radius of zip.
+            """
+            _p = {"tcin": tcin, "zip": zip, "radius": radius, "store_id": store_id}
+            return _run(lambda: client.target.availability(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_target_availability)
 
     if all or enable_home_depot:
         @function_tool

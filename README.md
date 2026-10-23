@@ -1,6 +1,6 @@
 # openai-agents-scavio
 
-[Scavio](https://scavio.dev) real-time search tools for the [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) — **193 tools across 31 platforms, a URL reader and website map / crawl / batch**, with one API key.
+[Scavio](https://scavio.dev) real-time search tools for the [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) — **194 tools across 31 platforms, a URL reader and website map / crawl / batch**, with one API key.
 
 Google, YouTube, Amazon, Walmart, eBay, Target, Home Depot, Reddit, X, TikTok, TikTok Shop, Instagram, Threads, LinkedIn, Kuaishou, Zillow, Redfin, Booking.com, Airbnb, Tripadvisor, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Google Ads Transparency and the Meta Ad Library — plus `scavio_extract`, which reads any URL as HTML, Markdown or plain text, and five opt-in website tools that map a site's URLs, crawl a whole site, or extract a list of pages in one job.
 
@@ -36,7 +36,7 @@ print(result.final_output)
 
 ### Pick your platforms
 
-193 tools is far more than any one agent should carry. Every platform is gated by
+194 tools is far more than any one agent should carry. Every platform is gated by
 an `enable_*` flag, all defaulting to `True` except `enable_crawl` (opt-in,
 because a crawl bills per page), so disable what you do not need:
 
@@ -70,7 +70,7 @@ Pass `all=True` to register every tool regardless of the individual flags.
 | `enable_linkedin` | 9 | `enable_capterra` | 3 |
 | `enable_threads` | 6 | `enable_google_ads` | 3 |
 | `enable_kuaishou` | 14 | `enable_meta_ads` | 3 |
-| `enable_ebay` | 3 | `enable_target` | 4 |
+| `enable_ebay` | 3 | `enable_target` | 5 |
 | `enable_home_depot` | 3 | `enable_zillow` | 3 |
 | `enable_booking` | 3 | `enable_tripadvisor` | 4 |
 | `enable_indeed` | 4 | `enable_extract` | 1 |

@@ -9,7 +9,7 @@ from agents.tool_context import ToolContext
 import openai_agents_scavio.tools as tools_mod
 from openai_agents_scavio import get_scavio_tools
 
-TOTAL_TOOLS = 193
+TOTAL_TOOLS = 194
 
 # Tool counts per enable_* flag. The sum is the whole surface, so a platform added
 # without a count here (or a count left stale) fails test_all_tools_register.
@@ -27,7 +27,7 @@ PLATFORM_COUNTS = {
     "threads": 6,
     "kuaishou": 14,
     "ebay": 3,
-    "target": 4,
+    "target": 5,
     "home_depot": 3,
     "zillow": 3,
     "booking": 3,
