@@ -7,17 +7,17 @@ Build the tools with `get_scavio_tools()` and pass them to an Agent:
 
     agent = Agent(name="Search", tools=get_scavio_tools())
 
-Covers the whole Scavio API across 31 platforms - Google, YouTube, Amazon,
+Covers the whole Scavio API across 33 platforms - Google, YouTube, Amazon,
 Walmart, Reddit, TikTok, TikTok Shop, Instagram, X, LinkedIn, Threads, Kuaishou,
 eBay, Target, Home Depot, Zillow, Redfin, Booking.com, Airbnb, Tripadvisor, Yelp,
 Indeed, Glassdoor, App Store, Google Play, SEC EDGAR, Companies House, G2,
-Capterra, Google Ads Transparency and the Meta Ad Library - plus the top-level
+Capterra, Google Ads Transparency, the Meta Ad Library, HEB and Kroger - plus the top-level
 `extract` endpoint that reads any URL as HTML, Markdown or plain text, and the
 website tools that map a site's URLs, crawl a site and batch-extract a URL list
 (opt-in via ``enable_crawl``, because a crawl bills per page).
 
-188 platform and extract tools over the 195 endpoints the Scavio SDK exposed
-before website crawling, plus 5 website tools (193 in all). The seven that are not
+193 platform and extract tools over the 200 endpoints the Scavio SDK exposed
+before website crawling, plus 5 website tools (198 in all). The seven that are not
 registered are dead or duplicate surfaces: /youtube/metadata (a deprecated alias
 of /youtube/video), /amazon/options (a keyless static marketplace list, not a
 search), and the five retired LinkedIn endpoints, which
@@ -101,6 +101,8 @@ def get_scavio_tools(
     enable_ebay: bool = True,
     enable_target: bool = True,
     enable_home_depot: bool = True,
+    enable_heb: bool = True,
+    enable_kroger: bool = True,
     enable_zillow: bool = True,
     enable_booking: bool = True,
     enable_tripadvisor: bool = True,
@@ -140,6 +142,8 @@ def get_scavio_tools(
         enable_ebay: Register the eBay tools (3). Defaults to True.
         enable_target: Register the Target tools (5). Defaults to True.
         enable_home_depot: Register the Home Depot tools (3). Defaults to True.
+        enable_heb: Register the HEB tools (3). Defaults to True.
+        enable_kroger: Register the Kroger tools (2). Defaults to True.
         enable_zillow: Register the Zillow tools (3). Defaults to True.
         enable_booking: Register the Booking.com tools (3). Defaults to True.
         enable_tripadvisor: Register the Tripadvisor tools (4). Defaults to True.
@@ -2697,6 +2701,68 @@ def get_scavio_tools(
             _p = {"ad_archive_id": ad_archive_id}
             return _run(lambda: client.meta_ads.ad(**{k: v for k, v in _p.items() if v is not None}))
         tools.append(scavio_meta_ads_ad)
+
+    if all or enable_heb:
+        @function_tool
+        def scavio_heb_search(query: str, page: Optional[int] = None, page_size: Optional[int] = None) -> dict:
+            """Search HEB grocery products by keyword. Costs 2 credits.
+
+            Args:
+                query: Product search query.
+                page: Results page, 1-based.
+                page_size: Results per page, 1-60 (default 30).
+            """
+            _p = {"page": page, "page_size": page_size}
+            return _run(lambda: client.heb.search(query=query, **{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_heb_search)
+        @function_tool
+        def scavio_heb_product(product_url: Optional[str] = None, product_id: Optional[str] = None, slug: Optional[str] = None) -> dict:
+            """Get detailed HEB product information by URL, product ID, or slug. Costs 2 credits.
+
+            Args:
+                product_url: Full HEB product page URL (preferred).
+                product_id: HEB product id. Requires slug when used.
+                slug: HEB product slug. Required with product_id.
+            """
+            _p = {"product_url": product_url, "product_id": product_id, "slug": slug}
+            return _run(lambda: client.heb.product(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_heb_product)
+        @function_tool
+        def scavio_heb_stores(zip: Optional[str] = None, city: Optional[str] = None) -> dict:
+            """Find HEB store locations by ZIP code or city. Costs 2 credits.
+
+            Args:
+                zip: 5-digit US ZIP code.
+                city: City name.
+            """
+            _p = {"zip": zip, "city": city}
+            return _run(lambda: client.heb.stores(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_heb_stores)
+
+    if all or enable_kroger:
+        @function_tool
+        def scavio_kroger_search(query: str, page: Optional[int] = None) -> dict:
+            """Search Kroger grocery products by keyword. Kroger operates Kroger, Ralphs, Fred Meyer, Harris Teeter, King Soopers, Fry's and other banners. Costs 2 credits.
+
+            Args:
+                query: Product search query.
+                page: Results page, 1-based.
+            """
+            _p = {"page": page}
+            return _run(lambda: client.kroger.search(query=query, **{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_kroger_search)
+        @function_tool
+        def scavio_kroger_product(product_url: Optional[str] = None, upc: Optional[str] = None, slug: Optional[str] = None) -> dict:
+            """Get detailed Kroger product information by URL, UPC, or slug. Costs 2 credits.
+
+            Args:
+                product_url: Full Kroger product page URL (preferred).
+                upc: Kroger product UPC code.
+                slug: Kroger product slug.
+            """
+            _p = {"product_url": product_url, "upc": upc, "slug": slug}
+            return _run(lambda: client.kroger.product(**{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_kroger_product)
 
     if all or enable_extract:
         @function_tool
