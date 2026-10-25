@@ -103,6 +103,7 @@ def get_scavio_tools(
     enable_home_depot: bool = True,
     enable_heb: bool = True,
     enable_kroger: bool = True,
+    enable_decathlon: bool = True,
     enable_zillow: bool = True,
     enable_booking: bool = True,
     enable_tripadvisor: bool = True,
@@ -144,6 +145,7 @@ def get_scavio_tools(
         enable_home_depot: Register the Home Depot tools (3). Defaults to True.
         enable_heb: Register the HEB tools (3). Defaults to True.
         enable_kroger: Register the Kroger tools (2). Defaults to True.
+        enable_decathlon: Register the Decathlon tools (2). Defaults to True.
         enable_zillow: Register the Zillow tools (3). Defaults to True.
         enable_booking: Register the Booking.com tools (3). Defaults to True.
         enable_tripadvisor: Register the Tripadvisor tools (4). Defaults to True.
@@ -2763,6 +2765,32 @@ def get_scavio_tools(
             _p = {"product_url": product_url, "upc": upc, "slug": slug}
             return _run(lambda: client.kroger.product(**{k: v for k, v in _p.items() if v is not None}))
         tools.append(scavio_kroger_product)
+
+    if all or enable_decathlon:
+        @function_tool
+        def scavio_decathlon_search(query: str, country: str, page: Optional[int] = None) -> dict:
+            """Search Decathlon products by keyword across 7 country domains (FR, ES, IT, IN, UK, PT, NET). Returns product name, brand, price (cents), currency, availability, rating, review count and image. Costs 2 credits.
+
+            Args:
+                query: Product search query.
+                country: Country domain: 'fr', 'es', 'it', 'in', 'uk', 'pt' or 'net'.
+                page: Results page, 1-based.
+            """
+            _p = {"page": page}
+            return _run(lambda: client.decathlon.search(query=query, country=country, **{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_decathlon_search)
+        @function_tool
+        def scavio_decathlon_product(country: str, product_url: Optional[str] = None, product_id: Optional[str] = None) -> dict:
+            """Full Decathlon product detail by URL or product ID: description, images, SKU, GTIN, color, price (cents), list price, availability, offers/variants, rating, review count, category and breadcrumbs. Costs 2 credits.
+
+            Args:
+                country: Country domain: 'fr', 'es', 'it', 'in', 'uk', 'pt' or 'net'.
+                product_url: Full Decathlon product page URL (preferred).
+                product_id: Decathlon numeric product ID.
+            """
+            _p = {"product_url": product_url, "product_id": product_id}
+            return _run(lambda: client.decathlon.product(country=country, **{k: v for k, v in _p.items() if v is not None}))
+        tools.append(scavio_decathlon_product)
 
     if all or enable_extract:
         @function_tool
