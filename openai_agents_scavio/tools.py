@@ -2706,27 +2706,29 @@ def get_scavio_tools(
 
     if all or enable_heb:
         @function_tool
-        def scavio_heb_search(query: str, page: Optional[int] = None, page_size: Optional[int] = None) -> dict:
-            """Search HEB grocery products by keyword. Costs 2 credits.
+        def scavio_heb_search(query: str, page: Optional[int] = None, page_size: Optional[int] = None, store_id: Optional[str] = None) -> dict:
+            """Search HEB grocery products by keyword. Pass store_id for one store's prices, stock and assortment. Costs 2 credits.
 
             Args:
                 query: Product search query.
                 page: Results page, 1-based.
-                page_size: Results per page, 1-60 (default 30).
+                page_size: Results per page, 1-60. Defaults to 60.
+                store_id: HEB store number from scavio_heb_stores (store_number). Prices, stock, aisle location and assortment come from that store; the store used is echoed in data.store {store_id, name}. US only. Omit for HEB's default store.
             """
-            _p = {"page": page, "page_size": page_size}
+            _p = {"page": page, "page_size": page_size, "store_id": store_id}
             return _run(lambda: client.heb.search(query=query, **{k: v for k, v in _p.items() if v is not None}))
         tools.append(scavio_heb_search)
         @function_tool
-        def scavio_heb_product(product_url: Optional[str] = None, product_id: Optional[str] = None, slug: Optional[str] = None) -> dict:
-            """Get detailed HEB product information by URL, product ID, or slug. Costs 2 credits.
+        def scavio_heb_product(product_url: Optional[str] = None, product_id: Optional[str] = None, slug: Optional[str] = None, store_id: Optional[str] = None) -> dict:
+            """Get detailed HEB product information by URL, product ID, or slug. With store_id the price, stock and aisle location are that store's and product_id alone is enough. Costs 2 credits.
 
             Args:
                 product_url: Full HEB product page URL (preferred).
-                product_id: HEB product id. Requires slug when used.
-                slug: HEB product slug. Required with product_id.
+                product_id: HEB product id. Needs slug, unless store_id is set (then product_id alone works).
+                slug: HEB product slug. Required with product_id unless store_id is set.
+                store_id: HEB store number from scavio_heb_stores (store_number). Prices, stock, aisle location and assortment come from that store; the store used is echoed in data.store {store_id, name}. US only. Omit for HEB's default store.
             """
-            _p = {"product_url": product_url, "product_id": product_id, "slug": slug}
+            _p = {"product_url": product_url, "product_id": product_id, "slug": slug, "store_id": store_id}
             return _run(lambda: client.heb.product(**{k: v for k, v in _p.items() if v is not None}))
         tools.append(scavio_heb_product)
         @function_tool

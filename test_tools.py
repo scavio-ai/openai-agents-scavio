@@ -437,3 +437,12 @@ def test_website_tools_never_describe_the_fetch_method(monkeypatch):
         assert "credit" in tool.description.lower(), tool.name
         for word in ("proxy", "residential", "datacenter", "headless", "browser"):
             assert word not in text, (tool.name, word)
+
+
+def test_heb_store_id_is_forwarded(monkeypatch):
+    tools = {t.name: t for t in _only(monkeypatch, "heb")}
+    out = _invoke(tools["scavio_heb_search"], {"query": "milk", "store_id": "441"})
+    assert out["kwargs"] == {"query": "milk", "store_id": "441"}
+    out = _invoke(tools["scavio_heb_product"], {"product_id": "314130", "store_id": "441"})
+    assert out["method"] == "product"
+    assert out["kwargs"] == {"product_id": "314130", "store_id": "441"}
